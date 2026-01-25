@@ -19,20 +19,19 @@ DEFAULT_EMAIL = "kenan.seremet04@gmail.com" # Fallback email
 @app.post("/webhook")
 async def handle_vapi_webhook(request: Request):
     data = await request.json()
+    print(data)
     
-    # We only care when the call is finished
-    if data.get("message", {}).get("type") == "end-of-call-report":
-        call_data = data["message"]["call"]
-        assistant_id = call_data.get("assistantId")
+    message = data.get("message", {}) # Get the message object
+    
+    if message.get("type") == "end-of-call-report":
+        # CHANGE THIS: Look in 'message', not 'call'
+        analysis = message.get("analysis", {}) 
+        call_data = message.get("call", {})
         
-        # 1. Determine Recipient (Multi-tenancy)
-        to_email = COMPANY_DIRECTORY.get(assistant_id, DEFAULT_EMAIL)
-        
-        # Vapi extracts data into "analysis" based on your instructions
-        analysis = call_data.get("analysis", {})
+        # Now your structured_data will actually contain your dossier
         structured_data = analysis.get("structuredData", {})
         
-        # 2. Extract Fields
+        # Rest of your extraction logic...
         address = structured_data.get('address')
         severity = structured_data.get('severity')
         source_of_loss = structured_data.get('source_of_loss')
