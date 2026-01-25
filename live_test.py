@@ -19,24 +19,31 @@ def run_live_test():
         "message": {
             "type": "end-of-call-report",
             "call": {
-                "assistantId": "vapi-assistant-id-1", # Uses default mapping to your email
-                "customer": {"number": "+15550109988"},
-                "analysis": {
-                    "structuredData": {
-                        "address": "742 Evergreen Terrace, Springfield",
-                        "severity": "Critical",
-                        "source_of_loss": "Burst Pipe in Basement",
-                        "water_still_flowing": True,
-                        "owner": True,
-                        "caller_name": "Homer Simpson",
-                        "site_access": "Key under mat",
-                        "is_power_off": False,
-                        "phone_number": "+15550109988",
-                        "insurance_status": "State Farm",
-                        "affected_surfaces": "Hardwood floors, Drywall"
-                    },
-                    "summary": "Customer reported a burst pipe in the basement. Water is currently flowing. Key is under the mat."
+                "assistantId": "vapi-assistant-id-1",
+            },
+            "artifact": {
+                "structuredOutputs": {
+                    "some-uuid": {
+                        "name": "emergency_dossier",
+                        "result": {
+                            "address": "742 Evergreen Terrace, Springfield",
+                            "severity": "Critical",
+                            "source_of_loss": "Burst Pipe in Basement",
+                            "water_still_flowing": True,
+                            "owner": True,
+                            "caller_name": "Homer Simpson",
+                            "site_access": "Key under mat",
+                            "is_power_off": False,
+                            "phone_number": "+15550109988",
+                            "insurance_status": "State Farm",
+                            "affected_surfaces": "Hardwood floors, Drywall"
+                        }
+                    }
                 }
+            },
+            "transcript": "Customer reported burst pipe...",
+            "analysis": {
+                "summary": "Customer reported a burst pipe in the basement. Water is currently flowing. Key is under the mat."
             }
         }
     }

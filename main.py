@@ -19,19 +19,37 @@ DEFAULT_EMAIL = "kenan.seremet04@gmail.com" # Fallback email
 @app.post("/webhook")
 async def handle_vapi_webhook(request: Request):
     data = await request.json()
-    print(data)
+    #print(data)
     
-    message = data.get("message", {}) # Get the message object
-    
-    if message.get("type") == "end-of-call-report":
-        # CHANGE THIS: Look in 'message', not 'call'
-        analysis = message.get("analysis", {}) 
-        call_data = message.get("call", {})
+    # We only care when the call is finished
+    if data.get("message", {}).get("type") == "end-of-call-report":
+        message_data = data["message"]
+        call_data = message_data.get("call", {})
+        assistant_id = call_data.get("assistantId")
         
-        # Now your structured_data will actually contain your dossier
-        structured_data = analysis.get("structuredData", {})
+        # 1. Determine Recipient (Multi-tenancy)
+        to_email = COMPANY_DIRECTORY.get(assistant_id, DEFAULT_EMAIL)
         
-        # Rest of your extraction logic...
+        # 2. Extract Fields
+        # Strategy: Look for "structuredOutputs" in the artifact
+        # The key is a dynamic UUID, so we need to find the one with 'stepName' or just take the first one.
+        structured_data = {}
+        
+        artifact = message_data.get("artifact", {})
+        structured_outputs = artifact.get("structuredOutputs", {})
+        
+        # Iterate to find the result. 
+        # In the log provided, it looks like: {'uuid': {'name': 'emergency_dossier', 'result': {...}}}
+        for output in structured_outputs.values():
+            if output.get("name") == "emergency_dossier" or "result" in output:
+                structured_data = output.get("result", {})
+                break
+        
+        # Fallback: Check analysis.structuredData just in case it appears there in other contexts
+        if not structured_data:
+             structured_data = message_data.get("analysis", {}).get("structuredData", {})
+             
+        # Extract specific fields from the found data dictionary
         address = structured_data.get('address')
         severity = structured_data.get('severity')
         source_of_loss = structured_data.get('source_of_loss')
@@ -44,6 +62,13 @@ async def handle_vapi_webhook(request: Request):
         phone_number = structured_data.get('phone_number')
         insurance_status = structured_data.get('insurance_status')
         affected_surfaces = structured_data.get('affected_surfaces')
+
+        # Extract Summary from transcript or analysis
+        # In the log, 'transcript' is at message_data['transcript']
+        transcript_summary = message_data.get("analysis", {}).get("summary")
+        if not transcript_summary:
+             # Fallback to just the raw transcript if summary is missing
+             transcript_summary = message_data.get("transcript", "No transcript available.")
 
         # 3. Validation Logic
         # Rule 1: Must have an address
@@ -81,7 +106,7 @@ async def handle_vapi_webhook(request: Request):
         Site Access: {site_access or 'N/A'}
         
         TRANSCRIPT SUMMARY:
-        {analysis.get('summary')}
+        {transcript_summary}
         """
         
         # Send the Email
