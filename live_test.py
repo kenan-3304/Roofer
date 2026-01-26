@@ -20,6 +20,7 @@ def run_live_test():
             "type": "end-of-call-report",
             "call": {
                 "assistantId": "vapi-assistant-id-1",
+                "customer": {"number": "+15550109988"},
             },
             "artifact": {
                 "structuredOutputs": {

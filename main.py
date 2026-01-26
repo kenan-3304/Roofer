@@ -19,7 +19,7 @@ DEFAULT_EMAIL = "kenan.seremet04@gmail.com" # Fallback email
 @app.post("/webhook")
 async def handle_vapi_webhook(request: Request):
     data = await request.json()
-    print(data)
+    #print(data)
     
     # We only care when the call is finished
     if data.get("message", {}).get("type") == "end-of-call-report":
@@ -59,7 +59,12 @@ async def handle_vapi_webhook(request: Request):
         caller_name = structured_data.get('caller_name')
         site_access = structured_data.get('site_access')
         is_power_off = structured_data.get('is_power_off') # boolean
-        phone_number = structured_data.get('phone_number')
+        
+        # Prioritize the actual Caller ID from the call metadata
+        phone_number = call_data.get('customer', {}).get('number')
+        if not phone_number:
+            phone_number = structured_data.get('phone_number')
+            
         insurance_status = structured_data.get('insurance_status')
         affected_surfaces = structured_data.get('affected_surfaces')
 
