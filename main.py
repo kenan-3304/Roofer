@@ -19,7 +19,7 @@ DEFAULT_EMAIL = "kenan.seremet04@gmail.com" # Fallback email
 @app.post("/webhook")
 async def handle_vapi_webhook(request: Request):
     data = await request.json()
-    #print(data)
+    print(data)
     
     # We only care when the call is finished
     if data.get("message", {}).get("type") == "end-of-call-report":
