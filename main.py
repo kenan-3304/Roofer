@@ -2,6 +2,7 @@ from fastapi import FastAPI, Request
 import resend # pip install resend
 import os
 import uvicorn
+import re
 
 app = FastAPI()
 
@@ -60,10 +61,18 @@ async def handle_vapi_webhook(request: Request):
         site_access = structured_data.get('site_access')
         is_power_off = structured_data.get('is_power_off') # boolean
         
-        # Prioritize the actual Caller ID from the call metadata
-        phone_number = call_data.get('customer', {}).get('number')
-        if not phone_number:
-            phone_number = structured_data.get('phone_number')
+        # Smart Phone Number Logic
+        # 1. Get the AI extracted phone number (might be text like "same number")
+        extracted_phone = structured_data.get('phone_number')
+        # 2. Get the actual Caller ID
+        caller_id = call_data.get('customer', {}).get('number')
+        
+        # 3. Decision: If extracted_phone looks like a real number (has 7+ digits), use it.
+        #    Otherwise, default to the Caller ID.
+        if extracted_phone and re.search(r'\d{7,}', str(extracted_phone)):
+            phone_number = extracted_phone
+        else:
+            phone_number = caller_id or extracted_phone
             
         insurance_status = structured_data.get('insurance_status')
         affected_surfaces = structured_data.get('affected_surfaces')
