@@ -119,7 +119,7 @@ async def handle_vapi_webhook(request: Request):
         Insurance: {insurance_status or 'Unknown'}
         Site Access: {site_access or 'N/A'}
         
-        TRANSCRIPT SUMMARY:
+        TRANSCRIPT:
         {transcript_summary}
         """
         
