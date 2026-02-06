@@ -13,7 +13,7 @@ resend.api_key = os.getenv("RESEND_API_KEY")
 COMPANY_DIRECTORY = {
     # Replace these with your actual Vapi Assistant IDs
     # using mms.att.net for AT&T to handle longer messages better than txt.att.net
-    "vapi-assistant-id-1": "7037760484@mms.att.net", 
+    "9337f242-55a2-4d4c-982b-3789b712896d": "7037760484@mms.att.net", 
     "vapi-assistant-id-2": "another.owner@example.com",
 }
 ADMIN_EMAIL = "kenan.seremet04@gmail.com" # Internal verification copy
