@@ -37,7 +37,8 @@ def run_live_test():
                             "is_power_off": False,
                             "phone_number": "+15550109988",
                             "insurance_status": "State Farm",
-                            "affected_surfaces": "Hardwood floors, Drywall"
+                            "affected_surfaces": "Hardwood floors, Drywall",
+                            "service_category": "water_emergency"
                         }
                     }
                 }

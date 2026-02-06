@@ -89,6 +89,7 @@ async def handle_vapi_webhook(request: Request):
             
         insurance_status = sanitize_input(structured_data.get('insurance_status'))
         affected_surfaces = sanitize_input(structured_data.get('affected_surfaces'))
+        service_category = sanitize_input(structured_data.get('service_category'))
 
         # Extract Summary
         transcript_summary = message_data.get("analysis", {}).get("summary")
@@ -102,32 +103,73 @@ async def handle_vapi_webhook(request: Request):
             print(f"Skipping Ghost Dossier: No Address AND No Phone. (CallerID: {caller_id})")
             return {"status": "skipped", "reason": "ghost_call_no_contact_info"}
         
-        # Build the Dossier Email
-        subject = f"🚨 EMERGENCY LEAD: {address or 'No Address Provided'}"
-        body = f"""
-        NEW EMERGENCY WATER DAMAGE DOSSIER
-        ----------------------------------
-        Caller Name: {caller_name or 'Unknown'}
-        Phone: {phone_number or 'N/A'}
-        Address: {address or 'N/A (See Phone)'}
-        Owner: {'Yes' if owner else 'No/Unknown'}
+        # Build the Dossier Email based on Category
+        category_slug = (service_category or "").lower()
         
-        CRITICAL DETAILS
-        ----------------
-        Water Still Flowing: {'YES' if water_still_flowing else 'No'}
-        Power Off: {'Yes' if is_power_off else 'No'}
-        Severity: {severity or 'N/A'}
-        Source of Loss: {source_of_loss or 'N/A'}
-        Affected Surfaces: {affected_surfaces or 'N/A'}
-        
-        LOGISTICS
-        ---------
-        Insurance: {insurance_status or 'Unknown'}
-        Site Access: {site_access or 'N/A'}
-        
-        TRANSCRIPT:
-        {transcript_summary}
-        """
+        # Template 1: Water Emergency (Detailed Dossier)
+        if "water_emergency" in category_slug:
+            subject = f"🚨 WATER EMERGENCY: {address or 'No Address'}"
+            body = f"""
+            🚨 NEW WATER EMERGENCY LEAD
+            ---------------------------
+            Caller: {caller_name or 'Unknown'}
+            Phone: {phone_number or 'N/A'}
+            Address: {address or 'N/A'}
+            Owner: {'Yes' if owner else 'No/Unknown'}
+            
+            CRITICAL STATUS
+            ---------------
+            Water Flowing: {'YES' if water_still_flowing else 'No'}
+            Power Off: {'Yes' if is_power_off else 'No'}
+            Severity: {severity or 'N/A'}
+            Source: {source_of_loss or 'N/A'}
+            Surfaces: {affected_surfaces or 'N/A'}
+            
+            LOGISTICS
+            ---------
+            Insurance: {insurance_status or 'Unknown'}
+            Access: {site_access or 'N/A'}
+            
+            TRANSCRIPT:
+            {transcript_summary}
+            """
+            
+        # Template 2: Non-Emergency (Mold, Fire, General Repair)
+        elif "mold" in category_slug or "fire" in category_slug or "non_emergency" in category_slug:
+            subject = f"⚠️ NEW LEAD ({service_category}): {address or 'No Address'}"
+            body = f"""
+            ⚠️ NEW LEAD DOISER
+            ------------------
+            Category: {service_category}
+            Caller: {caller_name or 'Unknown'}
+            Phone: {phone_number or 'N/A'}
+            Address: {address or 'N/A'}
+            
+            ISSUE DETAILS
+            -------------
+            Source/Issue: {source_of_loss or 'N/A'}
+            Severity: {severity or 'N/A'}
+            Owner: {'Yes' if owner else 'No/Unknown'}
+            Insurance: {insurance_status or 'Unknown'}
+            
+            TRANSCRIPT:
+            {transcript_summary}
+            """
+            
+        # Template 3: General Inquiry / Other
+        else:
+            subject = f"ℹ️ GENERAL INQUIRY: {caller_name or 'Unknown'}"
+            body = f"""
+            ℹ️ NEW GENERAL INQUIRY
+            ----------------------
+            Caller: {caller_name or 'Unknown'}
+            Phone: {phone_number or 'N/A'}
+            Address: {address or 'N/A'}
+            Category: {service_category or 'Unspecified'}
+            
+            TRANSCRIPT:
+            {transcript_summary}
+            """
         
         # Send the Email
         print(f"Sending email to recipients: {recipients}")
