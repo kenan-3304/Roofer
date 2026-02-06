@@ -19,7 +19,7 @@ def run_live_test():
         "message": {
             "type": "end-of-call-report",
             "call": {
-                "assistantId": "vapi-assistant-id-1",
+                "assistantId": "vapi-assistant-id-1", # Mapped to Kenan's AT&T Gateway
                 "customer": {"number": "+15550109988"},
             },
             "artifact": {

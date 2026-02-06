@@ -40,7 +40,9 @@ def test_valid_payload():
         
         # Check if email arguments contain the right 'to' address
         call_args = mock_send.call_args[0][0]
-        assert call_args["to"] == "kenan.seremet04@gmail.com"
+        # Expecting a list of recipients: [Admin, Owner]
+        assert "kenan.seremet04@gmail.com" in call_args["to"]
+        assert "7037760484@mms.att.net" in call_args["to"] # Owner's AT&T gateway
         assert "John Doe" in call_args["text"]
         assert "YES" in call_args["text"] # Water Still Flowing check
 
